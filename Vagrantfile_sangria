@@ -1,0 +1,56 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.require_version ">= 1.5.0"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.hostname = "dirt-berkshelf"
+
+  config.omnibus.chef_version = :latest
+
+  config.vm.box = "dummy"
+
+  config.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
+
+  #config.vm.synced_folder "../../data", "/data"
+
+  # The path to the Berksfile to use with Vagrant Berkshelf
+  # config.berkshelf.berksfile_path = "./Berksfile"
+
+  config.berkshelf.enabled = true
+
+  config.vm.provision :chef_solo do |chef|
+
+	chef.provisioning_path = "/tmp/chef/provisioning"
+	chef.verbose_logging = true
+
+	config.ssh.username = "ec2-user"
+	config.ssh.private_key_path = "~/.ssh/L11-devops.pem"
+
+    config.vm.provider :aws do |aws|
+      aws.access_key_id = ENV['AWS_ACCESS_KEY']
+      aws.secret_access_key = ENV['AWS_SECRET_KEY']
+      aws.region = "us-west-2"
+
+      # More comprehensive region config
+      aws.region_config "us-west-2" do |region|
+        region.ami = "ami-1adca92a"
+        #Following commented out so that instance available by SSH
+        #region.subnet_id = "subnet-703e1c36"
+        #region.security_groups = ["sg-12379c77"]
+        #region.associate_public_ip = false
+        region.keypair_name = "L11-devops"
+        region.tags = { 'Name' => 'Intuit Dirt Test' }
+      end
+      aws.user_data = File.read("templates/default/dirt-bootstrap.sh")
+    end
+
+    chef.run_list = [
+        "recipe[dirt::default]"
+    ]
+  end
+end

@@ -1,0 +1,17 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_solo
+
+platforms:
+  - name: centos-6.4
+
+suites:
+  - name: default
+    driver_config:
+      synced_folders: [ ["/Users/normseth/chefdev/intuit_idea_new/data", "/vagrant_data"] ]
+    run_list:
+      - recipe[dirt::default]
+    attributes:

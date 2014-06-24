@@ -1,0 +1,59 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # config.vm.provider :virtualbox do |vb|
+  #   # Use VBoxManage to customize the VM. For example to change memory:
+  #   vb.customize ["modifyvm", :id, "--memory", "1024"]
+  # end
+
+config.vm.define "jabba" do |jabba|
+  jabba.vm.box = "opscode-centos-6.5"
+  jabba.omnibus.chef_version = :latest
+  jabba.vm.hostname = "jabba"
+
+  jabba.vm.provision :chef_solo do |jabba|
+    jabba.cookbooks_path = "./cookbooks"
+    jabba.add_recipe "jabba-mysql"
+    jabba.add_recipe "jabba-cassandra"
+    jabba.add_recipe "jabba-apache"
+    jabba.add_recipe "jabba-runit"
+    jabba.add_recipe "jabba-app"
+    #jabba.json = { }
+  end
+end
+
+config.vm.provider :virtualbox do |vb|
+  # Use VBoxManage to customize the VM. For example to change memory:
+  vb.customize ["modifyvm", :id, "--memory", "1024"]
+end
+
+config.vm.define "sangria" do |sangria|
+  sangria.vm.box = "opscode-centos-6.5"
+  sangria.omnibus.chef_version = :latest
+  sangria.vm.hostname = "sangria"
+  sangria.vm.network :forwarded_port, guest: 8080, host: 8080
+
+  sangria.vm.provision :chef_solo do |sangria|
+    sangria.cookbooks_path = "./cookbooks"
+    sangria.add_recipe "sangria"
+  #sangria.json = { }
+  end
+end
+
+config.vm.define "dirt", primary: true do |dirt|
+  dirt.vm.box = "opscode-centos-6.5"
+  dirt.omnibus.chef_version = :latest
+  dirt.vm.hostname = "dirt"
+  dirt.vm.synced_folder "../../data", "/vagrant_data"
+
+  dirt.vm.provision :chef_solo do |dirt|
+    #dirt.cookbooks_path = "../../cookbooks"
+    dirt.add_recipe "dirt"
+  #dirt.json = { }
+  end
+end
+
+end
