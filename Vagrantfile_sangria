@@ -10,6 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.hostname = "dirt-berkshelf"
 
+  # This commented out because breaks chef-client provisioning.  Have worked around with user-data
   #config.omnibus.chef_version = :latest
 
   config.vm.box = "dummy"
@@ -23,7 +24,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.berkshelf.enabled = true
 
-  config.vm.provision :chef_solo do |chef|
+  #config.vm.provision :chef_solo do |chef|
+  config.vm.provision :chef_client do |chef|
+    chef.chef_server_url = "https://api.opscode.com/organizations/intuit_idea_chef"
+    chef.validation_key_path = "/Users/normseth/chefdev/intuit_idea_new/repo/.chef/intuit_idea_chef-validator.pem"
+    chef.validation_client_name = "intuit_idea_chef-validator"
+    chef.delete_node = true
+    chef.delete_client = true
+    chef.node_name = 'dirt-berkshelf'
 
 	  chef.provisioning_path = "/tmp/chef/provisioning"
 	  chef.verbose_logging = true
