@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.hostname = "dirt-berkshelf"
 
-  config.omnibus.chef_version = :latest
+  #config.omnibus.chef_version = :latest
 
   config.vm.box = "dummy"
 
@@ -25,18 +25,24 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision :chef_solo do |chef|
 
-	chef.provisioning_path = "/tmp/chef/provisioning"
-	chef.verbose_logging = true
+	  chef.provisioning_path = "/tmp/chef/provisioning"
+	  chef.verbose_logging = true
 
-	config.ssh.username = "ec2-user"
-	config.ssh.private_key_path = "~/.ssh/L11-devops.pem"
+    chef.run_list = [
+      "recipe[dirt::default]"
+    ]
 
+
+    # SSH has to be within "config"
+	  config.ssh.username = "ec2-user"
+	  config.ssh.private_key_path = "~/.ssh/L11-devops.pem"
+
+    # Provider has to be within "config"
     config.vm.provider :aws do |aws|
       aws.access_key_id = ENV['AWS_ACCESS_KEY']
       aws.secret_access_key = ENV['AWS_SECRET_KEY']
       aws.region = "us-west-2"
 
-      # More comprehensive region config
       aws.region_config "us-west-2" do |region|
         region.ami = "ami-1adca92a"
         #Following commented out so that instance available by SSH
@@ -46,11 +52,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         region.keypair_name = "L11-devops"
         region.tags = { 'Name' => 'Intuit Dirt Test' }
       end
+
       aws.user_data = File.read("templates/default/dirt-bootstrap.sh")
+
     end
 
-    chef.run_list = [
-        "recipe[dirt::default]"
-    ]
   end
 end

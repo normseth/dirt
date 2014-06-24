@@ -17,10 +17,22 @@ http_foo=http://proxy.sangria-dev.a.intuit.com:8080
 https_foo=https://proxy.sangria-dev.a.intuit.com:8080
 EOF2
 
-# disable require tty for rsync for ec2-user
+# Disable requiretty is needed for rsync with RHEL-family AMIs
 echo 'Defaults:ec2-user !requiretty' > /etc/sudoers.d/999-vagrant-cloud-init-requiretty && chmod 440 /etc/sudoers.d/999-vagrant-cloud-init-requiretty
 #(bash -i -c curl -L https://www.opscode.com/chef/install.sh | bash)
+bash --login -c "curl -L https://www.opscode.com/chef/install.sh > /tmp/chef-install.sh && chmod 755 /tmp/chef-install.sh && /tmp/chef-install.sh"
+#bash --login /tmp/chef-install.sh
 
+
+
+# Don't work
+#env > /tmp/env_simple.out
+#(env > /tmp/env_parens.out)
+
+# Does work
+bash --login -c "env > /tmp/env_bash.out"
+
+# Not needed if not on Intuit AMI
 # force provisioning path to be world-writable
-mkdir -p /tmp/chef/provisioning/chef-solo-1/cookbooks
-chmod ugo+rwx -R /tmp/chef
+#mkdir -p /tmp/chef/provisioning/chef-solo-1/cookbooks
+#chmod ugo+rwx -R /tmp/chef
