@@ -29,9 +29,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     chef.chef_server_url = "https://api.opscode.com/organizations/intuit_idea_chef"
     chef.validation_key_path = "/Users/normseth/chefdev/intuit_idea_new/repo/.chef/intuit_idea_chef-validator.pem"
     chef.validation_client_name = "intuit_idea_chef-validator"
-    chef.delete_node = true
-    chef.delete_client = true
     chef.node_name = 'dirt-berkshelf'
+
+    # Trying to delete node/client from server throws exception, but can manage with knife, for now
+    #chef.delete_node = true
+    #chef.delete_client = true
 
 	  chef.provisioning_path = "/tmp/chef/provisioning"
 	  chef.verbose_logging = true
